@@ -1,6 +1,5 @@
 document.getElementById('name').focus();
 
-
 //Create Event Listener for on change of role
 createEventListener(document.getElementById('title'), 'change', (e) => {
     if (e.target.value === 'other') {
@@ -40,12 +39,13 @@ createEventListener(document.getElementById('design'), 'change', (e) => {
     }
 });
 
-//Create listener for total cost of activities
+//Create listener for activities validation
 createEventListener(document.getElementById('activities'), 'change', (e) => {
     const list = document.querySelectorAll('input[data-cost]');
     const time = e.target.nextElementSibling.nextElementSibling.innerHTML;
     const compare = e.target;
 
+    //adds functionality to not allow same time of activities
     if (time != '$200') {
         for (let i = 0; i < list.length; i++) {
             if (list[i] != compare && list[i].name != 'all') {
@@ -59,7 +59,7 @@ createEventListener(document.getElementById('activities'), 'change', (e) => {
             }
         }
     }
-
+    //calc total cost of activities
     let totalCost = 0;
     for (let i = 0; i < list.length; i++) {
         if (list[i].checked) {
@@ -98,6 +98,10 @@ createEventListener(document.getElementById('payment'), 'change', (e) => {
     }
 });
 
+/** 
+ * Checks for a valid name
+ * @param  {element} el
+ */
 function checkName(el) {
     let status = el.value.length > 0;
     if (status) {
@@ -111,13 +115,24 @@ function checkName(el) {
     return status;
 }
 
+/** Checks for a valid email address */
 function checkEmail(el) {
-    const regex = /^\w+@\w+\.com$/;
-    let status = regex.test(el.value);
-    if (status) {
-        el.parentNode.classList.remove('not-valid');
-        el.parentNode.classList.add('valid');
-        el.nextElementSibling.style.display = 'none';
+    const value = el.value;
+    const regex = /^(\w+)@(\w+)(\.com)$/;
+    const status = regex.test(value);
+    const invalidChar = /[(),:;<>[\]]/;
+    const match = invalidChar.test(value);
+    if (status || match) {
+        if (match) {
+            const message = "Your email cannot contain invalid characters: ( ) , : ; < > [ ] \\";
+            el.nextElementSibling.innerHTML = message;
+            el.parentNode.classList.add('not-valid');
+            el.nextElementSibling.style.display = 'inherit';
+        } else {
+            el.parentNode.classList.remove('not-valid');
+            el.parentNode.classList.add('valid');
+            el.nextElementSibling.style.display = 'none';
+        }
     } else {
         el.parentNode.classList.add('not-valid');
         el.nextElementSibling.style.display = 'inherit';
@@ -192,9 +207,10 @@ createEventListener(document.getElementsByTagName('form')[0], 'submit', (e) => {
     const card = document.getElementById('cc-num');
     const zip = document.getElementById('zip');
     const cvv = document.getElementById('cvv');
-
-    console.log(checkFields(name, email, activities, [payment, card, zip, cvv]));
+    //console.log(checkFields(name, email, activities, [payment, card, zip, cvv]));
     if (checkFields(name, email, activities, [payment, card, zip, cvv]) != 4) {
+        e.preventDefault();
+    } else {
         e.preventDefault();
     }
 });
