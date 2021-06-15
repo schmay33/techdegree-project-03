@@ -12,6 +12,7 @@ createEventListener(document.getElementById('title'), 'change', (e) => {
 //Create event listener for t-shirt design and color
 createEventListener(document.getElementById('design'), 'change', (e) => {
     const color = document.getElementById('color');
+
     if (e.target.value) {
         color.removeAttribute('disabled');
         let hearts = document.querySelectorAll('option[data-theme="heart js"]');
@@ -20,19 +21,23 @@ createEventListener(document.getElementById('design'), 'change', (e) => {
         //If the user selects "Theme - I ♥ JS" then the "Color" menu should only display "Tomato," "Steel Blue," and "Dim Grey."
         if (e.target.value === 'heart js') {
             for (let pun of puns) {
+                pun.setAttribute('hidden', true);
                 pun.setAttribute('disabled', true);
                 color.value == pun.value ? color.value = 'Select a design theme above' : color.value = color.value;
             }
             for (let heart of hearts) {
+                heart.removeAttribute('hidden');
                 heart.removeAttribute('disabled');
             }
         } else if (e.target.value === 'js puns') {
             console.log('In Pun Loop');
             for (let heart of hearts) {
+                heart.setAttribute('hidden', true);
                 heart.setAttribute('disabled', true);
                 color.value == heart.value ? color.value = 'Select a design theme above' : color.value = color.value;
             }
             for (let pun of puns) {
+                pun.removeAttribute('hidden');
                 pun.removeAttribute('disabled');
             }
         }
@@ -44,15 +49,25 @@ createEventListener(document.getElementById('activities'), 'change', (e) => {
     const list = document.querySelectorAll('input[data-cost]');
     const time = e.target.nextElementSibling.nextElementSibling.innerHTML;
     const compare = e.target;
+    const checked = e.target.checked;
 
     //adds functionality to not allow same time of activities
     if (time != '$200') {
-        for (let i = 0; i < list.length; i++) {
-            if (list[i] != compare && list[i].name != 'all') {
-                if (list[i].nextElementSibling.nextElementSibling.innerHTML === time && compare.checked === true) {
-                    list[i].setAttribute('disabled', true);
-                    list[i].parentNode.classList.add('disabled');
-                } else {
+        if (checked) {
+            for (let i = 0; i < list.length; i++) {
+                let time2 = list[i].nextElementSibling.nextElementSibling.innerHTML;
+                let listName = list[i].name;
+                if (listName != compare.name && listName != 'all') {
+                    if (time2 === time) {
+                        list[i].setAttribute('disabled', true);
+                        list[i].parentNode.classList.add('disabled');
+                    }
+                }
+            }
+        } else {
+            for (let i = 0; i < list.length; i++) {
+                let time2 = list[i].nextElementSibling.nextElementSibling.innerHTML;
+                if (time2 === time) {
                     list[i].removeAttribute('disabled');
                     list[i].parentNode.classList.remove('disabled');
                 }
@@ -139,7 +154,10 @@ function checkEmail(el) {
     }
     return status;
 }
-
+/**
+ * Check activities to add help text
+ * @param  {element} el
+ */
 function checkActivities(el) {
     let status = (el.innerHTML.length > 9);
     if (status) {
@@ -153,9 +171,16 @@ function checkActivities(el) {
     return status;
 }
 
+/**
+ * Check Payment required fields
+ * @param  {string} payment
+ * @param  {int} card
+ * @param  {int} zip
+ * @param  {int} cvv
+ */
 function checkPayment(payment, card, zip, cvv) {
     let count = 0;
-    if (payment.value = 'credit-card') {
+    if (payment.value === 'credit-card') {
         const cardReg = /[0-9]{13,16}/;
         const zipReg = /[0-9]{5}/;
         const cvvReg = /[0-9]{3}/;
@@ -190,15 +215,19 @@ function checkPayment(payment, card, zip, cvv) {
     return count === 3 ? true : false;
 }
 
+//check required fields
 function checkFields(name, email, act, pay) {
     let count = 0
     checkName(name) ? count++ : count;
     checkEmail(email) ? count++ : count;
     checkActivities(act) ? count++ : count;
-    checkPayment(pay[0], pay[1], pay[2], pay[3]) ? count++ : count;
+    if (pay[0].value === 'credit-card') {
+        checkPayment(pay[0], pay[1], pay[2], pay[3]) ? count++ : count;
+    } else {count++}
     return count;
 }
 
+//create listener for form submit
 createEventListener(document.getElementsByTagName('form')[0], 'submit', (e) => {
     const name = document.getElementById('name');
     const email = document.getElementById('email');
@@ -210,8 +239,7 @@ createEventListener(document.getElementsByTagName('form')[0], 'submit', (e) => {
     //console.log(checkFields(name, email, activities, [payment, card, zip, cvv]));
     if (checkFields(name, email, activities, [payment, card, zip, cvv]) != 4) {
         e.preventDefault();
-    } else {
-        e.preventDefault();
+        console.log("prevented submit");
     }
 });
 
@@ -229,6 +257,7 @@ for (let i = 0; i < checkboxes.length; i++) {
         }
     });
 }
+
 
 createEventListener(document.getElementById('email'), 'keyup', (e) => {
     checkEmail(document.getElementById('email'));
